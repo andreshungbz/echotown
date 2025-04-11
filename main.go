@@ -31,7 +31,7 @@ func main() {
 	defer listener.Close()
 
 	fmt.Println("Server listening on :4000")
-	
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
