@@ -3,9 +3,18 @@ package server
 import (
 	"fmt"
 	"net"
+
+	"github.com/andreshungbz/echotown/internal/logger"
 )
 
 func Start(port int) {
+	// logger to keep track of connections and disconnections
+	serverLogger, close, err := logger.NewServer()
+	if err != nil {
+		panic(err)
+	}
+	defer close()
+
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		panic(err)
@@ -21,7 +30,12 @@ func Start(port int) {
 			continue
 		}
 
-		go handleConn(conn)
+		serverLogger.Printf("[%v] connected to the server.\n", conn.RemoteAddr())
+
+		go func() {
+			handleConn(conn)
+			serverLogger.Printf("[%v] disconnected from the server.\n", conn.RemoteAddr())
+		}()
 	}
 }
 

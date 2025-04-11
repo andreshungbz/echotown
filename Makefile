@@ -9,6 +9,7 @@
 # variables
 PREFIX = [make]
 BUILD_DIR = bin/
+LOG_DIR = log/
 
 # rules
 
@@ -25,6 +26,6 @@ build: vet
 	@go build -o $(BUILD_DIR)
 
 clean:
-	@echo "$(PREFIX) removing $(BUILD_DIR)"
+	@echo "$(PREFIX) removing $(BUILD_DIR) and logs"
 	@rm -rfv $(BUILD_DIR)
-	@rm -v *-mpscan.json
+	@rm -rfv $(LOG_DIR)
