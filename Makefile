@@ -13,7 +13,12 @@ LOG_DIR = log/
 
 # rules
 
-format:
+clean:
+	@echo "$(PREFIX) removing $(BUILD_DIR) and log directory"
+	@rm -rfv $(BUILD_DIR)
+	@rm -rfv $(LOG_DIR)
+
+format: clean
 	@echo "$(PREFIX) formatting source code"
 	@go fmt ./...
 
@@ -24,8 +29,3 @@ vet: format
 build: vet
 	@echo "$(PREFIX) building executable in $(BUILD_DIR)"
 	@go build -o $(BUILD_DIR)
-
-clean:
-	@echo "$(PREFIX) removing $(BUILD_DIR) and logs"
-	@rm -rfv $(BUILD_DIR)
-	@rm -rfv $(LOG_DIR)
