@@ -8,18 +8,19 @@ import (
 )
 
 func Start(port int) {
+	// TCP connection listener on the local machine
+	listener, err := createTCPListener(port)
+	if err != nil {
+		panic(err)
+	}
+	defer listener.Close()
+
 	// logger to keep track of connections and disconnections
 	serverLogger, close, err := logger.NewServer()
 	if err != nil {
 		panic(err)
 	}
 	defer close()
-
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-	if err != nil {
-		panic(err)
-	}
-	defer listener.Close()
 
 	fmt.Println("Server listening on :4000")
 
@@ -55,4 +56,15 @@ func handleConn(conn net.Conn) {
 			fmt.Println("Error writing to client:", err)
 		}
 	}
+}
+
+// createTCPListener returns a [net.Listener] with the network set to "tcp"
+// and the address set to the local machine along with the provided port argument.
+func createTCPListener(port int) (net.Listener, error) {
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	if err != nil {
+		return nil, err
+	}
+
+	return listener, nil
 }
