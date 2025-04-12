@@ -1,3 +1,4 @@
+// Package server contains functions to start the echo server.
 package server
 
 import (
@@ -7,6 +8,7 @@ import (
 	"github.com/andreshungbz/echotown/internal/logger"
 )
 
+// Start launches an infinite loop that creates a goroutine for every connecting client.
 func Start(port int) {
 	// TCP connection listener on the local machine
 	listener, err := createTCPListener(port)
@@ -22,28 +24,37 @@ func Start(port int) {
 	}
 	defer close()
 
-	fmt.Println("Server listening on :4000")
+	// print and log server start message
+	serverLogger.Printf("[INFO] Echo Town server started at [%s:%d]\n", getLocalIP(), port)
 
+	// server infinite loop
 	for {
+		// wait to accept incoming client connections
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Println("Error accepting:", err)
+			serverLogger.Printf("[ERROR] Connection acceptance failed: %v\n", err)
 			continue
 		}
 
-		serverLogger.Printf("[%v] connected to the server.\n", conn.RemoteAddr())
-
+		// launch a goroutine to handle the individual client
+		serverLogger.Printf("[INFO] [%v] connected to the server.\n", conn.RemoteAddr())
 		go func() {
 			handleConn(conn)
-			serverLogger.Printf("[%v] disconnected from the server.\n", conn.RemoteAddr())
+			serverLogger.Printf("[INFO] [%v] disconnected from the server.\n", conn.RemoteAddr())
 		}()
+
+		// loop back to wait and accept another client connection until Ctrl + C is pressed on server
 	}
 }
 
+// NON-EXPORTED FUNCTIONS
+
+// handleConn processes an individual connection to a client.
 func handleConn(conn net.Conn) {
 	defer conn.Close()
 	buf := make([]byte, 1024)
 
+	// client connection infinite loop
 	for {
 		n, err := conn.Read(buf)
 		if err != nil {
@@ -67,4 +78,24 @@ func createTCPListener(port int) (net.Listener, error) {
 	}
 
 	return listener, nil
+}
+
+// getLocalIP returns the local IPv4 address
+func getLocalIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "localhost"
+	}
+
+	for _, addr := range addrs {
+		// check that the address is not the loopback address
+		if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() {
+			// return only IPv4 addresses
+			if ipNet.IP.To4() != nil {
+				return ipNet.IP.String()
+			}
+		}
+	}
+
+	return "localhost"
 }

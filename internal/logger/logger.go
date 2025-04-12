@@ -1,3 +1,4 @@
+// Package logger contains functions that handle creating appropriate [net.Logger] instances.
 package logger
 
 import (
