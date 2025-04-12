@@ -39,7 +39,6 @@ func createResponse(reader *bufio.Reader) (string, error) {
 	// read until a newline character
 	input, err := reader.ReadString('\n')
 	if err != nil {
-		fmt.Println("Error reading from client:", err)
 		return "", err
 	}
 
@@ -75,4 +74,7 @@ func validateInput(input *string) {
 	if !utf8.ValidString(*input) {
 		*input = ERROR_BAD_UTF8.Error()
 	}
+
+	// append newline
+	*input = *input + "\n"
 }

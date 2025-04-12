@@ -56,9 +56,11 @@ func handleConn(conn net.Conn) {
 	defer conn.Close()
 
 	clientAddress := conn.RemoteAddr()
+	clientPrompt := fmt.Sprintf("\n[%v]: ", clientAddress)
+	welcomeMessage := fmt.Sprintf("Welcome to Echo Town! (CTRL + C to disconnect)\nYou are connected as [%v]\n", clientAddress)
 
 	// send a welcome message to the client
-	_, err := conn.Write([]byte(fmt.Sprintf("Welcome to Echo Town! (CTRL + C to disconnect)\nYou are connected as [%v]\n", clientAddress)))
+	_, err := conn.Write([]byte(welcomeMessage))
 	if err != nil {
 		fmt.Println("Error sending welcome message to client:", err)
 		return
@@ -69,12 +71,13 @@ func handleConn(conn net.Conn) {
 	// client connection infinite loop
 	for {
 		// indicate to client a prompt for input
-		_, err = conn.Write([]byte(fmt.Sprintf("\n[%v]: ", clientAddress)))
+		_, err = conn.Write([]byte(clientPrompt))
 		if err != nil {
 			fmt.Println("Error sending prompt to client:", err)
 			return
 		}
 
+		// construct response from validated input
 		response, err := createResponse(reader)
 		if err != nil {
 			fmt.Println("Error reading from client:", err)
