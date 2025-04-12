@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -24,4 +25,29 @@ func monitorTermSig(logger *log.Logger) {
 		logger.Print("[INFO] Echo Town server stopped.\n\n")
 		os.Exit(0)
 	}()
+}
+
+// createResponse reads the client input from the passed [bufio.Reader] and constructs
+// the server response string to write back to the client. It reads until a newline is
+// encountered, performs validation, and clears the buffer at the end. Invalid input
+// is processed as messages written back to the client.
+func createResponse(reader *bufio.Reader) (string, error) {
+	defer reader.Discard(reader.Buffered()) // clear buffer at the end
+
+	// read until a newline character
+	input, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Println("Error reading from client:", err)
+		return "", err
+	}
+
+	// override input with a reject message if input is larger than 1024 bytes
+	if len(input) > 1024 {
+		input = "[ERROR] Message cannot be longer than 1024 bytes!"
+	}
+
+	// prepend server responses
+	response := fmt.Sprintf("[Echo Town]: %s", input)
+
+	return response, nil
 }

@@ -2,6 +2,7 @@
 package server
 
 import (
+	"bufio"
 	"fmt"
 	"net"
 
@@ -63,7 +64,7 @@ func handleConn(conn net.Conn) {
 		return
 	}
 
-	buf := make([]byte, 1024)
+	reader := bufio.NewReader(conn)
 
 	// client connection infinite loop
 	for {
@@ -74,16 +75,14 @@ func handleConn(conn net.Conn) {
 			return
 		}
 
-		n, err := conn.Read(buf)
+		response, err := createResponse(reader)
 		if err != nil {
 			fmt.Println("Error reading from client:", err)
 			return
 		}
 
-		// prepend server responses
-		response := append([]byte("[Echo Town]: "), buf[:n]...)
-
-		_, err = conn.Write(response)
+		// write response to the client
+		_, err = conn.Write([]byte(response))
 		if err != nil {
 			fmt.Println("Error writing to client:", err)
 		}
