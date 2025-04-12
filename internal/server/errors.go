@@ -12,6 +12,7 @@ var (
 	ERROR_BAD_UTF8 = errors.New("Message contains invalid UTF-8 characters!")
 )
 
+// createError constructs an error string to be logged.
 func createError(message string, address net.Addr, err error) string {
 	return fmt.Sprintf("[ERROR] [%v] %v: %v\n", address, message, err)
 }

@@ -42,6 +42,7 @@ func createResponse(reader *bufio.Reader) (string, error) {
 		return "", err
 	}
 
+	// validate and modify input if necessary
 	err = validateInput(&input)
 	if err != nil {
 		return "", err
