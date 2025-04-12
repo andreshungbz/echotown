@@ -9,14 +9,13 @@
 # variables
 PREFIX = [make]
 BUILD_DIR = bin/
-LOG_DIR = log/
+LOG_DIR = log
 
 # rules
 
 clean:
-	@echo "$(PREFIX) removing $(BUILD_DIR) and log directory"
-	@rm -rfv $(BUILD_DIR)
-	@rm -rfv $(LOG_DIR)
+	@echo "$(PREFIX) removing $(BUILD_DIR) and log directories"
+	@find . -type d -name "$(LOG_DIR)" -exec rm -rfv {} +
 
 format: clean
 	@echo "$(PREFIX) formatting source code"
