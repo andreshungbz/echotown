@@ -41,11 +41,24 @@ func Start(port int) {
 			continue
 		}
 
+		clientConnectLog := fmt.Sprintf("[INFO] [%v] connected to the server.\n", conn.RemoteAddr())
+		clientDisconnectLog := fmt.Sprintf("[INFO] [%v] disconnected from the server.\n", conn.RemoteAddr())
+
 		// launch a goroutine to handle the individual client
-		serverLogger.Printf("[INFO] [%v] connected to the server.\n", conn.RemoteAddr())
+		serverLogger.Print(clientConnectLog)
 		go func() {
-			handleConn(conn, serverLogger)
-			serverLogger.Printf("[INFO] [%v] disconnected from the server.\n", conn.RemoteAddr())
+			// logger to record client messages and server responses to those messages
+			clientLogger, close, err := logger.NewClient(conn.RemoteAddr())
+			if err != nil {
+				panic(err)
+			}
+			defer close()
+
+			clientLogger.Print(clientConnectLog)
+			handleConn(conn, serverLogger, clientLogger)
+			clientLogger.Print(clientDisconnectLog + "\n")
+
+			serverLogger.Print(clientDisconnectLog)
 		}()
 
 		// loop back to wait and accept another client connection until Ctrl + C is pressed on server
@@ -53,7 +66,7 @@ func Start(port int) {
 }
 
 // handleConn processes an individual connection to a client.
-func handleConn(conn net.Conn, serverLogger *log.Logger) {
+func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 	defer conn.Close()
 
 	clientAddress := conn.RemoteAddr()
@@ -79,7 +92,7 @@ func handleConn(conn net.Conn, serverLogger *log.Logger) {
 		}
 
 		// construct response from validated input
-		response, err := createResponse(reader)
+		response, err := createResponse(reader, clientLogger)
 		if err != nil {
 			errString := createError("Reading client input failed", clientAddress, err)
 			conn.Write([]byte(errString))

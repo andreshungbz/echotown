@@ -33,7 +33,7 @@ func monitorTermSig(logger *log.Logger) {
 // createResponse reads the client input from the passed [bufio.Reader] and constructs
 // the server response string to write back to the client. It reads until a newline is
 // encountered, performs validation, and clears the buffer at the end.
-func createResponse(reader *bufio.Reader) (string, error) {
+func createResponse(reader *bufio.Reader, logger *log.Logger) (string, error) {
 	defer reader.Discard(reader.Buffered()) // clear buffer at the end
 
 	// read until a newline character
@@ -42,11 +42,18 @@ func createResponse(reader *bufio.Reader) (string, error) {
 		return "", err
 	}
 
+	// log client message
+	logger.Printf("[MESSAGE] %s", input)
+
 	// validate and modify input if necessary
 	err = validateInput(&input)
 	if err != nil {
+		logger.Printf("[RESPONSE] %v\n", err)
 		return "", err
 	}
+
+	// log server response to client message
+	logger.Printf("[RESPONSE] %s", input)
 
 	// prepend server responses
 	response := fmt.Sprintf("[Echo Town]: %s", input)
