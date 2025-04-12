@@ -3,7 +3,11 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/andreshungbz/echotown/internal/logger"
 )
@@ -26,6 +30,9 @@ func Start(port int) {
 
 	// print and log server start message
 	serverLogger.Printf("[INFO] Echo Town server started at [%s:%d]\n", getLocalIP(), port)
+
+	// monitor for termination signal and print server stop message
+	monitorTermSig(serverLogger)
 
 	// server infinite loop
 	for {
@@ -80,7 +87,7 @@ func createTCPListener(port int) (net.Listener, error) {
 	return listener, nil
 }
 
-// getLocalIP returns the local IPv4 address
+// getLocalIP returns the local IPv4 address string or "localhost"
 func getLocalIP() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
@@ -98,4 +105,22 @@ func getLocalIP() string {
 	}
 
 	return "localhost"
+}
+
+// monitorTermSig creates a channel to monitor OS termination signals
+// and launches a single goroutine to print and log a server end message when
+// the signal is received.
+func monitorTermSig(logger *log.Logger) {
+	signalChan := make(chan os.Signal, 1)
+
+	// register channel to receive interrupt and termination OS signals
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
+
+	// when a proper signal is received, log message and exit program
+	go func() {
+		<-signalChan
+		fmt.Println() // print a new line just for the console
+		logger.Print("[INFO] Echo Town server stopped.\n\n")
+		os.Exit(0)
+	}()
 }
