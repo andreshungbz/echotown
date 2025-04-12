@@ -59,17 +59,37 @@ func Start(port int) {
 // handleConn processes an individual connection to a client.
 func handleConn(conn net.Conn) {
 	defer conn.Close()
+
+	clientAddress := conn.RemoteAddr()
+
+	// send a welcome message to the client
+	_, err := conn.Write([]byte(fmt.Sprintf("Welcome to Echo Town! (CTRL + C to disconnect)\nYou are connected as [%v]\n", clientAddress)))
+	if err != nil {
+		fmt.Println("Error sending welcome message to client:", err)
+		return
+	}
+
 	buf := make([]byte, 1024)
 
 	// client connection infinite loop
 	for {
+		// indicate to client a prompt for input
+		_, err = conn.Write([]byte(fmt.Sprintf("\n[%v]: ", clientAddress)))
+		if err != nil {
+			fmt.Println("Error sending prompt to client:", err)
+			return
+		}
+
 		n, err := conn.Read(buf)
 		if err != nil {
 			fmt.Println("Error reading from client:", err)
 			return
 		}
 
-		_, err = conn.Write(buf[:n])
+		// prepend server responses
+		response := append([]byte("[Echo Town]: "), buf[:n]...)
+
+		_, err = conn.Write(response)
 		if err != nil {
 			fmt.Println("Error writing to client:", err)
 		}
