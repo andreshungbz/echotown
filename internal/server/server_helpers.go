@@ -57,7 +57,7 @@ func createResponse(reader *bufio.Reader) (string, error) {
 func validateInput(input *string) {
 	// validate input larger than 1024 bytes
 	if len(*input) > 1024 {
-		*input = "[ERROR] Message cannot be longer than 1024 bytes!"
+		*input = ERROR_LONG_MSG.Error()
 	}
 
 	// trim whitespace
@@ -66,13 +66,13 @@ func validateInput(input *string) {
 	// validate input with non-printable characters (bad characters)
 	for _, rune := range *input {
 		if !strconv.IsPrint(rune) {
-			*input = "[ERROR] Message contains non-printable characters!"
+			*input = ERROR_NON_PRNT.Error()
 			break
 		}
 	}
 
 	// validate UTF-8 string
 	if !utf8.ValidString(*input) {
-		*input = "[ERROR] Message contains invalid UTF-8 characters!"
+		*input = ERROR_BAD_UTF8.Error()
 	}
 }
