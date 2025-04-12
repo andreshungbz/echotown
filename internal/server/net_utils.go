@@ -16,11 +16,11 @@ func createTCPListener(port int) (net.Listener, error) {
 	return listener, nil
 }
 
-// getLocalIP returns the local IPv4 address string or "localhost"
-func getLocalIP() string {
+// getLocalAddr returns [net.Addr] of the local machine with a passed in port.
+func getLocalAddr(port int) net.Addr {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
-		return "localhost"
+		return &net.TCPAddr{IP: net.ParseIP("localhost"), Port: port}
 	}
 
 	for _, addr := range addrs {
@@ -28,10 +28,10 @@ func getLocalIP() string {
 		if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() {
 			// return only IPv4 addresses
 			if ipNet.IP.To4() != nil {
-				return ipNet.IP.String()
+				return &net.TCPAddr{IP: ipNet.IP, Port: port}
 			}
 		}
 	}
 
-	return "localhost"
+	return &net.TCPAddr{IP: net.ParseIP("localhost"), Port: port}
 }

@@ -27,7 +27,7 @@ func Start(port int) {
 	defer close()
 
 	// print and log server start message
-	serverLogger.Printf("[INFO] Echo Town server started at [%s:%d]\n", getLocalIP(), port)
+	serverLogger.Printf("[INFO] Echo Town server started at [%v]\n", getLocalAddr(port))
 
 	// monitor for termination signal and print server stop message
 	monitorTermSig(serverLogger)
