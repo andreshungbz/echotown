@@ -4,6 +4,7 @@ package server
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net"
 
 	"github.com/andreshungbz/echotown/internal/logger"
@@ -43,7 +44,7 @@ func Start(port int) {
 		// launch a goroutine to handle the individual client
 		serverLogger.Printf("[INFO] [%v] connected to the server.\n", conn.RemoteAddr())
 		go func() {
-			handleConn(conn)
+			handleConn(conn, serverLogger)
 			serverLogger.Printf("[INFO] [%v] disconnected from the server.\n", conn.RemoteAddr())
 		}()
 
@@ -52,7 +53,7 @@ func Start(port int) {
 }
 
 // handleConn processes an individual connection to a client.
-func handleConn(conn net.Conn) {
+func handleConn(conn net.Conn, serverLogger *log.Logger) {
 	defer conn.Close()
 
 	clientAddress := conn.RemoteAddr()
@@ -62,7 +63,7 @@ func handleConn(conn net.Conn) {
 	// send a welcome message to the client
 	_, err := conn.Write([]byte(welcomeMessage))
 	if err != nil {
-		fmt.Println("Error sending welcome message to client:", err)
+		serverLogger.Print(createError("Writing welcome message failed", clientAddress, err))
 		return
 	}
 
@@ -73,21 +74,22 @@ func handleConn(conn net.Conn) {
 		// indicate to client a prompt for input
 		_, err = conn.Write([]byte(clientPrompt))
 		if err != nil {
-			fmt.Println("Error sending prompt to client:", err)
+			serverLogger.Print(createError("Writing client prompt failed", clientAddress, err))
 			return
 		}
 
 		// construct response from validated input
 		response, err := createResponse(reader)
 		if err != nil {
-			fmt.Println("Error reading from client:", err)
+			serverLogger.Print(createError("Reading client input failed", clientAddress, err))
 			return
 		}
 
 		// write response to the client
 		_, err = conn.Write([]byte(response))
 		if err != nil {
-			fmt.Println("Error writing to client:", err)
+			serverLogger.Print(createError("Writing response to client failed", clientAddress, err))
+			return
 		}
 	}
 }
