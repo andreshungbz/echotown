@@ -6,7 +6,10 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"syscall"
+	"unicode/utf8"
 )
 
 // monitorTermSig creates a channel to monitor OS termination signals
@@ -29,8 +32,7 @@ func monitorTermSig(logger *log.Logger) {
 
 // createResponse reads the client input from the passed [bufio.Reader] and constructs
 // the server response string to write back to the client. It reads until a newline is
-// encountered, performs validation, and clears the buffer at the end. Invalid input
-// is processed as messages written back to the client.
+// encountered, performs validation, and clears the buffer at the end.
 func createResponse(reader *bufio.Reader) (string, error) {
 	defer reader.Discard(reader.Buffered()) // clear buffer at the end
 
@@ -41,13 +43,36 @@ func createResponse(reader *bufio.Reader) (string, error) {
 		return "", err
 	}
 
-	// override input with a reject message if input is larger than 1024 bytes
-	if len(input) > 1024 {
-		input = "[ERROR] Message cannot be longer than 1024 bytes!"
-	}
+	validateInput(&input)
 
 	// prepend server responses
 	response := fmt.Sprintf("[Echo Town]: %s", input)
 
 	return response, nil
+}
+
+// validateInput modifies the input by checking for size and bad characters.
+// It also trims the input of any whitespace. Invalid input is processed
+// as messages written back to the client.
+func validateInput(input *string) {
+	// validate input larger than 1024 bytes
+	if len(*input) > 1024 {
+		*input = "[ERROR] Message cannot be longer than 1024 bytes!"
+	}
+
+	// trim whitespace
+	*input = strings.TrimSpace(*input)
+
+	// validate input with non-printable characters (bad characters)
+	for _, rune := range *input {
+		if !strconv.IsPrint(rune) {
+			*input = "[ERROR] Message contains non-printable characters!"
+			break
+		}
+	}
+
+	// validate UTF-8 string
+	if !utf8.ValidString(*input) {
+		*input = "[ERROR] Message contains invalid UTF-8 characters!"
+	}
 }
