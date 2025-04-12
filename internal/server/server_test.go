@@ -81,10 +81,6 @@ func initiateConn(port int, t *testing.T) (net.Conn, bufio.Reader) {
 func assertResponse(want string, reader *bufio.Reader, t *testing.T) {
 	t.Helper()
 
-	// clear server prepend
-	_, _ = reader.ReadString(' ')
-	_, _ = reader.ReadString(' ')
-
 	// read response
 	response, err := reader.ReadString('\n')
 	if err != nil {
@@ -95,7 +91,7 @@ func assertResponse(want string, reader *bufio.Reader, t *testing.T) {
 	response = strings.TrimSpace(response)
 
 	// validate
-	if response != want {
+	if !strings.Contains(response, want) {
 		t.Errorf("Expected %q, got: %q", want, response)
 	}
 }

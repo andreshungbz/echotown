@@ -42,7 +42,10 @@ func createResponse(reader *bufio.Reader) (string, error) {
 		return "", err
 	}
 
-	validateInput(&input)
+	err = validateInput(&input)
+	if err != nil {
+		return "", err
+	}
 
 	// prepend server responses
 	response := fmt.Sprintf("[Echo Town]: %s", input)
@@ -51,12 +54,11 @@ func createResponse(reader *bufio.Reader) (string, error) {
 }
 
 // validateInput modifies the input by checking for size and bad characters.
-// It also trims the input of any whitespace. Invalid input is processed
-// as messages written back to the client.
-func validateInput(input *string) {
+// It also trims the input of any whitespace.
+func validateInput(input *string) error {
 	// validate input larger than 1024 bytes
 	if len(*input) > 1024 {
-		*input = ERROR_LONG_MSG.Error()
+		return ERROR_LONG_MSG
 	}
 
 	// trim whitespace
@@ -65,16 +67,17 @@ func validateInput(input *string) {
 	// validate input with non-printable characters (bad characters)
 	for _, rune := range *input {
 		if !strconv.IsPrint(rune) {
-			*input = ERROR_NON_PRNT.Error()
-			break
+			return ERROR_NON_PRNT
 		}
 	}
 
 	// validate UTF-8 string
 	if !utf8.ValidString(*input) {
-		*input = ERROR_BAD_UTF8.Error()
+		return ERROR_BAD_UTF8
 	}
 
 	// append newline
 	*input = *input + "\n"
+
+	return nil
 }

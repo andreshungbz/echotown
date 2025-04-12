@@ -81,7 +81,9 @@ func handleConn(conn net.Conn, serverLogger *log.Logger) {
 		// construct response from validated input
 		response, err := createResponse(reader)
 		if err != nil {
-			serverLogger.Print(createError("Reading client input failed", clientAddress, err))
+			errString := createError("Reading client input failed", clientAddress, err)
+			conn.Write([]byte(errString))
+			serverLogger.Print(errString)
 			return
 		}
 
@@ -89,7 +91,6 @@ func handleConn(conn net.Conn, serverLogger *log.Logger) {
 		_, err = conn.Write([]byte(response))
 		if err != nil {
 			serverLogger.Print(createError("Writing response to client failed", clientAddress, err))
-			return
 		}
 	}
 }
