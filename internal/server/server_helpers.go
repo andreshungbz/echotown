@@ -55,10 +55,7 @@ func createResponse(reader *bufio.Reader, logger *log.Logger) (string, error) {
 	// log server response to client message
 	logger.Printf("[RESPONSE] %s", input)
 
-	// prepend server responses
-	response := fmt.Sprintf("[Echo Town]: %s\n", input)
-
-	return response, nil
+	return input, nil
 }
 
 // validateInput modifies the input by checking for size and bad characters.

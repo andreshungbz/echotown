@@ -111,6 +111,9 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 			return
 		}
 
+		// prepend server responses
+		response = fmt.Sprintf("[Echo Town]: %s\n", response)
+
 		// write response to the client
 		_, err = conn.Write([]byte(response))
 		if err != nil {
