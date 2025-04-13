@@ -20,7 +20,7 @@ func createTCPListener(port int) (net.Listener, error) {
 func getLocalAddr(port int) net.Addr {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
-		return &net.TCPAddr{IP: net.ParseIP("localhost"), Port: port}
+		return &net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: port}
 	}
 
 	for _, addr := range addrs {
@@ -33,5 +33,5 @@ func getLocalAddr(port int) net.Addr {
 		}
 	}
 
-	return &net.TCPAddr{IP: net.ParseIP("localhost"), Port: port}
+	return &net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: port}
 }
