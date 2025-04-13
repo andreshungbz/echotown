@@ -80,7 +80,7 @@ make clean
 
 ### Most Educationally Enriching Functionality
 
-The most educationally enriching functionality was the the logger implemntation. It was cool to see how versatile the `log` standard library package is. Being able to easily determine the log output to standard output, to a file, or to both at the same tiem was very useful. I got to review file handling concepts I was introduce to in Programming 2, such as file modes, as well as Linux file permissions (I still can't rapidly convert from the octal system, but I recognize to which group the permissions should map to). Using my `logger` package helped organize my project and enabled easy extensibility when I needed to implement client message logging.
+The most educationally enriching functionality was the the logger implemntation. It was cool to see how versatile the `log` standard library package is. Being able to easily determine the log output to standard output, to a file, or to both at the same time was very useful. I got to review file handling concepts I was introduced to in Programming 2, such as file modes, as well as Linux file permissions (I still can't rapidly convert from the octal system, but I recognize to which group the permissions should map to). Using my `logger` package helped organize my project and enabled easy extensibility when I needed to implement client message logging.
 
 ### Funcionality That Required the Most Research
 
