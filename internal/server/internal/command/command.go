@@ -12,18 +12,54 @@ type CommandResponse struct {
 
 	// determines whether to close the connection
 	Close bool
+
+	// what the command does
+	Description string
 }
 
 // extendible map of specific command protocols to custom response
-var commands = map[string]CommandResponse{
-	"/time": {func(string) string { return time.Now().String() }, false},
-	"/quit": {func(string) string { return "" }, true},
-	"/echo": {func(input string) string {
-		if len(input) > len("/echo") {
-			return input[len("/echo "):]
-		}
-		return ""
-	}, false},
+var commands = make(map[string]CommandResponse)
+
+// initiate map
+func init() {
+	commands["/time"] = CommandResponse{
+		Message: func(string) string {
+			return time.Now().String()
+		},
+		Close:       false,
+		Description: "Displays the server time.",
+	}
+
+	commands["/quit"] = CommandResponse{
+		Message: func(string) string {
+			return ""
+		},
+		Close:       true,
+		Description: "Closes the connection to the server.",
+	}
+
+	commands["/echo"] = CommandResponse{
+		Message: func(input string) string {
+			if len(input) > len("/echo") {
+				return input[len("/echo "):]
+			}
+			return ""
+		},
+		Close:       false,
+		Description: "Returns only the message. Same result if not used.",
+	}
+
+	commands["/help"] = CommandResponse{
+		Message: func(string) string {
+			var helpMessage strings.Builder
+			for key, response := range commands {
+				helpMessage.WriteString("\n" + key + " - " + response.Description)
+			}
+			return helpMessage.String()
+		},
+		Close:       false,
+		Description: "Lists all available commands and their descriptions.",
+	}
 }
 
 // Parse compares the input to pre-determined keys, and if they match,
