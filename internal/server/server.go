@@ -78,7 +78,7 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 	// send a welcome message to the client
 	_, err := conn.Write([]byte(welcomeMessage))
 	if err != nil {
-		serverLogger.Print(createError("Writing welcome message failed", clientAddress, err))
+		serverLogger.Print(createError("Welcome Message", clientAddress, err))
 		return
 	}
 
@@ -90,14 +90,14 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 		// indicate to client a prompt for input
 		_, err = conn.Write([]byte(clientPrompt))
 		if err != nil {
-			serverLogger.Print(createError("Writing client prompt failed", clientAddress, err))
+			serverLogger.Print(createError("Client Prompt", clientAddress, err))
 			return
 		}
 
 		// construct response from validated input
 		response, err := createResponse(reader, clientLogger)
 		if err != nil {
-			errString := createError("Reading client input failed", clientAddress, err)
+			errString := createError("Client Input", clientAddress, err)
 
 			// print a nicer message for client when timeout occurs
 			if strings.Contains(errString, "timeout") {
@@ -114,7 +114,7 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 		// write response to the client
 		_, err = conn.Write([]byte(response))
 		if err != nil {
-			serverLogger.Print(createError("Writing response to client failed", clientAddress, err))
+			serverLogger.Print(createError("Server Write", clientAddress, err))
 		}
 	}
 }
