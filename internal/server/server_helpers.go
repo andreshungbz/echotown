@@ -52,9 +52,6 @@ func createResponse(reader *bufio.Reader, logger *log.Logger) (string, error) {
 		return "", err
 	}
 
-	// log server response to client message
-	logger.Printf("[RESPONSE] %s", input)
-
 	return input, nil
 }
 

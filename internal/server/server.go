@@ -9,7 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/andreshungbz/echotown/internal/logger"
+	"github.com/andreshungbz/echotown/internal/server/internal/logger"
+	"github.com/andreshungbz/echotown/internal/server/internal/personality"
 )
 
 // Start launches an infinite loop that creates a goroutine for every connecting client.
@@ -111,6 +112,15 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 			return
 		}
 
+		// determines whether to close connection
+		var close bool
+
+		// parse server custom personality response
+		response, close = personality.Parse(response)
+
+		// log server response to client message
+		clientLogger.Printf("[RESPONSE] %s", response)
+
 		// prepend server responses
 		response = fmt.Sprintf("[Echo Town]: %s\n", response)
 
@@ -118,6 +128,12 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 		_, err = conn.Write([]byte(response))
 		if err != nil {
 			serverLogger.Print(createError("Server Write", clientAddress, err))
+		}
+
+		// send custom exit message when connection is closed through personality of command protocol
+		if close {
+			conn.Write([]byte("\nCome back to Echo Town soon!\n"))
+			return
 		}
 	}
 }
