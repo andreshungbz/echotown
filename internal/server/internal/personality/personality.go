@@ -1,7 +1,7 @@
 // Package personality contains custom server responses to specific client inputs.
 package personality
 
-type PersonalityResponse struct {
+type personalityResponse struct {
 	// message to be printed to client
 	Message string
 
@@ -10,21 +10,21 @@ type PersonalityResponse struct {
 }
 
 // extendible map of specific input to custom response
-var responses = make(map[string]PersonalityResponse)
+var responses = make(map[string]personalityResponse)
 
 // initiate map
 func init() {
-	responses["hello"] = PersonalityResponse{
+	responses["hello"] = personalityResponse{
 		Message: "Hi there!",
 		Close:   false,
 	}
 
-	responses[""] = PersonalityResponse{
+	responses[""] = personalityResponse{
 		Message: "Say something...",
 		Close:   false,
 	}
 
-	responses["bye"] = PersonalityResponse{
+	responses["bye"] = personalityResponse{
 		Message: "Goodbye!",
 		Close:   true,
 	}

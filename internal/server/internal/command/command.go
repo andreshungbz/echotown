@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type CommandResponse struct {
+type commandResponse struct {
 	// message function that returns a string to be printed to client
 	Message func(string) string
 
@@ -18,11 +18,11 @@ type CommandResponse struct {
 }
 
 // extendible map of specific command protocols to custom response
-var commands = make(map[string]CommandResponse)
+var commands = make(map[string]commandResponse)
 
 // initiate map
 func init() {
-	commands["/time"] = CommandResponse{
+	commands["/time"] = commandResponse{
 		Message: func(string) string {
 			return time.Now().String()
 		},
@@ -30,7 +30,7 @@ func init() {
 		Description: "Displays the server time.",
 	}
 
-	commands["/quit"] = CommandResponse{
+	commands["/quit"] = commandResponse{
 		Message: func(string) string {
 			return ""
 		},
@@ -38,7 +38,7 @@ func init() {
 		Description: "Closes the connection to the server.",
 	}
 
-	commands["/echo"] = CommandResponse{
+	commands["/echo"] = commandResponse{
 		Message: func(input string) string {
 			if len(input) > len("/echo") {
 				return input[len("/echo "):]
@@ -49,7 +49,7 @@ func init() {
 		Description: "Returns only the message. Same result if not used.",
 	}
 
-	commands["/help"] = CommandResponse{
+	commands["/help"] = commandResponse{
 		Message: func(string) string {
 			var helpMessage strings.Builder
 			for key, response := range commands {
