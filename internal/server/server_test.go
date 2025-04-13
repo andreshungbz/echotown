@@ -15,45 +15,30 @@ func TestEchoServerResponse(t *testing.T) {
 	go Start(port)
 	time.Sleep(100 * time.Millisecond) // give server time to start up
 
-	t.Run("Client Message Too Long", func(t *testing.T) {
-		conn, reader := initiateConn(port, t)
-		defer conn.Close()
-
-		longMessage := strings.Repeat("A", 2048) + "\n"
-
-		_, err := conn.Write([]byte(longMessage))
-		if err != nil {
-			t.Fatalf("Failed to send message: %v", err)
+	t.Run("Validation Responses", func(t *testing.T) {
+		tests := []struct {
+			name           string
+			input          string
+			expectedOutput string
+		}{
+			{"Client Message Too Long", strings.Repeat("A", 2048) + "\n", ERROR_LONG_MSG.Error()},
+			{"Client Message Contains Non-Printable Characters", "Hello\x00World\n", ERROR_NON_PRNT.Error()},
+			{"Client Message Contains Invalid UTF-8", string([]byte{0xff, 0xfe, 0xfd, '\n'}), ERROR_BAD_UTF8.Error()},
 		}
 
-		assertResponse(ERROR_LONG_MSG.Error(), &reader, t)
-	})
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				conn, reader := initiateConn(port, t)
+				defer conn.Close()
 
-	t.Run("Client Message Contains Non-Printable Characters", func(t *testing.T) {
-		conn, reader := initiateConn(port, t)
-		defer conn.Close()
+				_, err := conn.Write([]byte(tt.input))
+				if err != nil {
+					t.Fatalf("Failed to send message: %v", err)
+				}
 
-		badChars := "Hello\x00World\n" // null byte is non-printable
-		_, err := conn.Write([]byte(badChars))
-		if err != nil {
-			t.Fatalf("Failed to send message: %v", err)
+				assertResponse(tt.expectedOutput, &reader, t)
+			})
 		}
-
-		assertResponse(ERROR_NON_PRNT.Error(), &reader, t)
-	})
-
-	t.Run("Client Message Contains Invalid UTF-8", func(t *testing.T) {
-		conn, reader := initiateConn(port, t)
-		defer conn.Close()
-
-		// Invalid UTF-8 byte sequence
-		invalidUTF8 := []byte{0xff, 0xfe, 0xfd, '\n'}
-		_, err := conn.Write(invalidUTF8)
-		if err != nil {
-			t.Fatalf("Failed to send message: %v", err)
-		}
-
-		assertResponse(ERROR_BAD_UTF8.Error(), &reader, t)
 	})
 
 	time.Sleep(100 * time.Millisecond) // give time to log last disconnect
