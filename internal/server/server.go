@@ -14,32 +14,29 @@ import (
 	"github.com/andreshungbz/echotown/internal/server/internal/personality"
 )
 
-// Start launches an infinite loop that creates a goroutine for every connecting client.
-func Start(port int) {
-	// TCP connection listener on the local machine
+// Start infinitely listens for connection and creates a goroutine for every connecting client.
+// It is stopped when an interrupt or termination signal is received.
+func Start(port int) { // launch a goroutine to handle the individual client
+	// create TCP listener on specified port
 	listener, err := createTCPListener(port)
 	if err != nil {
 		panic(err)
 	}
 	defer listener.Close()
 
-	// logger to keep track of connections and disconnections
+	// logger for connections/disconnections
 	serverLogger, close, err := logger.NewServer()
 	if err != nil {
 		panic(err)
 	}
 	defer close()
 
-	// print and log server start message
-	serverLogger.Printf("[INFO] Echo Town server started at [%v]\n", getLocalAddr(port))
-
 	// monitor for termination signal and print server stop message
 	monitorTermSig(serverLogger)
 
-	// server infinite loop
-	for {
-		// wait to accept incoming client connections
-		conn, err := listener.Accept()
+	serverLogger.Printf("[INFO] Echo Town server started at [%v]\n", getLocalAddr(port))
+	for { // server infinite loop
+		conn, err := listener.Accept() // wait to accept incoming client connections
 		if err != nil {
 			serverLogger.Printf("[ERROR] Connection acceptance failed: %v\n", err)
 			continue
@@ -48,10 +45,10 @@ func Start(port int) {
 		clientConnectLog := fmt.Sprintf("[INFO] [%v] connected to the server.\n", conn.RemoteAddr())
 		clientDisconnectLog := fmt.Sprintf("[INFO] [%v] disconnected from the server.\n", conn.RemoteAddr())
 
-		// launch a goroutine to handle the individual client
 		serverLogger.Print(clientConnectLog)
+		// launch a goroutine to handle the individual client
 		go func() {
-			// logger to record client messages and server responses to those messages
+			// logger for client messages/server responses
 			clientLogger, close, err := logger.NewClient(conn.RemoteAddr())
 			if err != nil {
 				panic(err)
@@ -64,8 +61,6 @@ func Start(port int) {
 
 			serverLogger.Print(clientDisconnectLog)
 		}()
-
-		// loop back to wait and accept another client connection until Ctrl + C is pressed on server
 	}
 }
 
@@ -79,8 +74,7 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 	welcomeMessage := fmt.Sprintf("Welcome to Echo Town!\nEnter /quit or \"bye\" to exit\nEnter /help for more commands\nYou are connected as [%v]\n", clientAddress)
 	goodbyeMessage := "\nCome back to Echo Town soon!\n"
 
-	// send a welcome message to the client
-	_, err := conn.Write([]byte(welcomeMessage))
+	_, err := conn.Write([]byte(welcomeMessage)) // send a welcome message to the client
 	if err != nil {
 		serverLogger.Print(createError("Welcome Message", clientAddress, err))
 		return
@@ -88,19 +82,14 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 
 	reader := bufio.NewReader(conn)
 
-	// client connection infinite loop
-	for {
-		// MESSAGE CONSTRUCTION
-
-		// indicate to client a prompt for input
-		_, err = conn.Write([]byte(clientPrompt))
+	for { // client connection infinite loop
+		_, err = conn.Write([]byte(clientPrompt)) // indicate to client a prompt for input
 		if err != nil {
 			serverLogger.Print(createError("Client Prompt", clientAddress, err))
 			return
 		}
 
-		// set and reset connection timeout
-		conn.SetReadDeadline(time.Now().Add(time.Second * 30))
+		conn.SetReadDeadline(time.Now().Add(time.Second * 30)) // set or reset connection timeout
 
 		// construct response from validated input
 		response, err := createResponse(reader, clientLogger)
@@ -121,31 +110,27 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 
 		// PERSONALITY & COMMAND PROTOCOL PARSING
 
-		var close bool // determines whether to close the connection
+		var close bool // determines whether to close the connection based on command protocol or personality
 
 		response, close = command.Parse(response)
+
 		if close {
 			conn.Write([]byte(goodbyeMessage))
 			return
 		}
 
-		response, close = personality.Parse(response) // parse server custom personality response
+		response, close = personality.Parse(response)
 
 		// SERVER TO CLIENT WRITING
 
-		// log server response to client message
-		clientLogger.Printf("[RESPONSE] %s", response)
+		clientLogger.Printf("[RESPONSE] %s", response)            // log server response to client log
+		response = fmt.Sprintf("%s%s\n", serverPrepend, response) // prepend server response
 
-		// prepend server responses
-		response = fmt.Sprintf("%s%s\n", serverPrepend, response)
-
-		// write response to the client
-		_, err = conn.Write([]byte(response))
+		_, err = conn.Write([]byte(response)) // write response to the client
 		if err != nil {
 			serverLogger.Print(createError("Server Write", clientAddress, err))
 		}
 
-		// send custom exit message when connection is closed through personality of command protocol
 		if close {
 			conn.Write([]byte(goodbyeMessage))
 			return
