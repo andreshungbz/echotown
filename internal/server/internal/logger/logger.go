@@ -11,12 +11,17 @@ import (
 	"strings"
 )
 
-// NewServer returns a [log.Logger] that writes to both standard output and to log/echotown.log.
+// NewServer returns a [log.Logger] that writes to both standard output and to log/echotown_{addr}.log
+// where addr is a passed in [net.Addr] whose periods and colons are replaced with underscores.
 // Its second return value is a cleanup function for closing the file.
-func NewServer() (*log.Logger, func(), error) {
+func NewServer(addr net.Addr) (*log.Logger, func(), error) {
+	// replace periods and colons of address to underscores and append .log
+	// e.g. 192.168.18.125:50000 becomes echotown_192_168_18_125_p50000.log
+	addrStr := "echotown_" + strings.ReplaceAll(strings.ReplaceAll(addr.String(), ".", "_"), ":", "_p") + ".log"
+
 	// create log directory if it doesn't exist
 	// provides read and execution permissions to group and everyone, and additional write permission to owner
-	logPath := "log/echotown.log"
+	logPath := fmt.Sprintf("log/%s", addrStr)
 	err := os.MkdirAll(filepath.Dir(logPath), 0755)
 	if err != nil {
 		return nil, nil, err

@@ -6,7 +6,12 @@ import (
 )
 
 func TestNewServer(t *testing.T) {
-	logger, cleanup, err := NewServer()
+	addr := &net.TCPAddr{
+		IP:   net.ParseIP("127.0.0.1"),
+		Port: 12345,
+	}
+
+	logger, cleanup, err := NewServer(addr)
 
 	if err != nil {
 		t.Fatalf("NewServer() error = %v; want nil", err)

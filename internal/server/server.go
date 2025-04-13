@@ -19,6 +19,8 @@ import (
 // Start infinitely listens for connection and creates a goroutine for every connecting client.
 // It is stopped when an interrupt or termination signal is received.
 func Start(port int) { // launch a goroutine to handle the individual client
+	localAddr := getLocalAddr(port)
+
 	// create TCP listener on specified port
 	listener, err := createTCPListener(port)
 	if err != nil {
@@ -27,7 +29,7 @@ func Start(port int) { // launch a goroutine to handle the individual client
 	defer listener.Close()
 
 	// logger for connections/disconnections
-	serverLogger, close, err := logger.NewServer()
+	serverLogger, close, err := logger.NewServer(localAddr)
 	if err != nil {
 		panic(err)
 	}
@@ -36,7 +38,7 @@ func Start(port int) { // launch a goroutine to handle the individual client
 	// monitor for termination signal and print server stop message
 	monitorTermSig(serverLogger)
 
-	serverLogger.Printf("[INFO] Echo Town server started at [%v]\n", getLocalAddr(port))
+	serverLogger.Printf("[INFO] Echo Town server started at [%v]\n", localAddr)
 	for { // server infinite loop
 		conn, err := listener.Accept() // wait to accept incoming client connections
 		if err != nil {
