@@ -56,7 +56,7 @@ func createResponse(reader *bufio.Reader, logger *log.Logger) (string, error) {
 	logger.Printf("[RESPONSE] %s", input)
 
 	// prepend server responses
-	response := fmt.Sprintf("[Echo Town]: %s", input)
+	response := fmt.Sprintf("[Echo Town]: %s\n", input)
 
 	return response, nil
 }
@@ -83,9 +83,6 @@ func validateInput(input *string) error {
 	if !utf8.ValidString(*input) {
 		return ERROR_BAD_UTF8
 	}
-
-	// append newline
-	*input = *input + "\n"
 
 	return nil
 }
