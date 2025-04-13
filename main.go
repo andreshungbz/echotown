@@ -1,3 +1,5 @@
+// Echo Town is a TCP echo server program that handles multiple clients, writes logs,
+// has custom personality responses, and has a simple command protocol.
 package main
 
 import (
