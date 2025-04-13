@@ -88,6 +88,8 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 
 	// client connection infinite loop
 	for {
+		// MESSAGE CONSTRUCTION
+
 		// indicate to client a prompt for input
 		_, err = conn.Write([]byte(clientPrompt))
 		if err != nil {
@@ -112,11 +114,14 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 			return
 		}
 
-		// determines whether to close connection
-		var close bool
+		// PERSONALITY & COMMAND PROTOCOL PARSING
+
+		var close bool // determines whether to close the connection
 
 		// parse server custom personality response
 		response, close = personality.Parse(response)
+
+		// SERVER TO CLIENT WRITING
 
 		// log server response to client message
 		clientLogger.Printf("[RESPONSE] %s", response)
