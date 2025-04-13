@@ -56,7 +56,9 @@ func initiateConn(port int, t *testing.T) (net.Conn, bufio.Reader) {
 
 	reader := bufio.NewReader(conn)
 	_, _ = reader.ReadString('\n') // welcome line
-	_, _ = reader.ReadString('\n') // connection line
+	_, _ = reader.ReadString('\n') // exit line
+	_, _ = reader.ReadString('\n') // help line
+	_, _ = reader.ReadString('\n') // connection info line
 	_, _ = reader.ReadString(' ')  // prompt
 
 	return conn, *reader

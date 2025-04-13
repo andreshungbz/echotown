@@ -75,7 +75,7 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 
 	clientAddress := conn.RemoteAddr()
 	clientPrompt := fmt.Sprintf("\n[%v]: ", clientAddress)
-	welcomeMessage := fmt.Sprintf("Welcome to Echo Town! (CTRL + C to disconnect)\nYou are connected as [%v]\n", clientAddress)
+	welcomeMessage := fmt.Sprintf("Welcome to Echo Town!\nEnter /quit or \"bye\" to exit\nEnter /help for more commands\nYou are connected as [%v]\n", clientAddress)
 
 	// send a welcome message to the client
 	_, err := conn.Write([]byte(welcomeMessage))
