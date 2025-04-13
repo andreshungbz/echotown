@@ -12,54 +12,45 @@ import (
 )
 
 // NewServer returns a [log.Logger] that writes to both standard output and to log/echotown_{addr}.log
-// where addr is a passed in [net.Addr] whose periods and colons are replaced with underscores.
+// where addr is a formatted filename based on the passed in [net.Addr].
 // Its second return value is a cleanup function for closing the file.
 func NewServer(addr net.Addr) (*log.Logger, func(), error) {
-	// replace periods and colons of address to underscores and append .log
-	// e.g. 192.168.18.125:50000 becomes echotown_192_168_18_125_p50000.log
-	addrStr := "echotown_" + strings.ReplaceAll(strings.ReplaceAll(addr.String(), ".", "_"), ":", "_p") + ".log"
+	fileName := "echotown_" + formatFileString(addr.String()) + ".log"
 
 	// create log directory if it doesn't exist
-	// provides read and execution permissions to group and everyone, and additional write permission to owner
-	logPath := fmt.Sprintf("log/%s", addrStr)
+	logPath := fmt.Sprintf("log/%s", fileName)
 	err := os.MkdirAll(filepath.Dir(logPath), 0755)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// creates file if it doesn't exist, opens in write-only mode, and appends if it exists already
-	// provides read and write permissions to owner, group and everyone
+	// creates file if it doesn't exist
 	file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// write both to the console and to file
+	// write to both the console and file
 	mw := io.MultiWriter(os.Stdout, file)
 	logger := log.New(mw, "", log.Ldate|log.Ltime)
 
-	// provide a cleanup function to close the file properly
 	return logger, func() { file.Close() }, nil
 }
 
 // NewClient returns a [log.Logger] that writes to log/{addr}.log where addr is a
-// passed in [net.Addr] whose periods and colons are replaced with underscores.
+// formatted filename based on the passed in [net.Addr].
 // Its second return value is a cleanup function for closing the file.
 func NewClient(addr net.Addr) (*log.Logger, func(), error) {
-	// replace periods and colons of address to underscores and append .log
-	// e.g. 192.168.18.125:50000 becomes 192_168_18_125_p50000.log
-	addrStr := strings.ReplaceAll(strings.ReplaceAll(addr.String(), ".", "_"), ":", "_p") + ".log"
+	fileName := "client_" + formatFileString(addr.String()) + ".log"
 
 	// create log directory if it doesn't exist
-	// provides read and execution permissions to group and everyone, and additional write permission to owner
-	logPath := fmt.Sprintf("log/%s", addrStr)
+	logPath := fmt.Sprintf("log/%s", fileName)
 	err := os.MkdirAll(filepath.Dir(logPath), 0755)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// creates file if it doesn't exist, opens in write-only mode, and appends if it exists already
-	// provides read and write permissions to owner, group and everyone
+	// creates file if it doesn't exist
 	file, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return nil, nil, err
@@ -68,6 +59,24 @@ func NewClient(addr net.Addr) (*log.Logger, func(), error) {
 	// write to file only
 	logger := log.New(file, "", log.Ldate|log.Ltime)
 
-	// provide a cleanup function to close the file properly
 	return logger, func() { file.Close() }, nil
+}
+
+// formatFileString replaces the IPv4 and IPv6 loopback address to the string "localhost",
+// replaces periods with underscores, and then replaces colons with _p.
+// e.g. 192.168.18.125:50000 becomes 192_168_18_125_p50000.
+func formatFileString(addrStr string) string {
+	// replace IPv6 loopback address with "localhost"
+	addrStr = strings.Replace(addrStr, "[::1]", "localhost", 1)
+
+	// replace IPv4 loopback address with "localhost"
+	addrStr = strings.Replace(addrStr, "127.0.0.1", "localhost", 1)
+
+	// replace periods with underscores
+	addrStr = strings.ReplaceAll(addrStr, ".", "_")
+
+	// replace port extention with _p
+	addrStr = strings.ReplaceAll(addrStr, ":", "_p")
+
+	return addrStr
 }
