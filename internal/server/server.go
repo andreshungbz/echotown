@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
+	"time"
 
 	"github.com/andreshungbz/echotown/internal/logger"
 )
@@ -80,6 +82,7 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 		return
 	}
 
+	conn.SetReadDeadline(time.Now().Add(time.Second * 30))
 	reader := bufio.NewReader(conn)
 
 	// client connection infinite loop
@@ -95,6 +98,14 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 		response, err := createResponse(reader, clientLogger)
 		if err != nil {
 			errString := createError("Reading client input failed", clientAddress, err)
+
+			// print a nicer message for client when timeout occurs
+			if strings.Contains(errString, "timeout") {
+				conn.Write([]byte("\n[TIMEOUT] 30 seconds have passed. Disconnecting...\n"))
+				serverLogger.Print(errString)
+				return
+			}
+
 			conn.Write([]byte(errString))
 			serverLogger.Print(errString)
 			return
