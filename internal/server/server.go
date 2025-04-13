@@ -75,7 +75,9 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 
 	clientAddress := conn.RemoteAddr()
 	clientPrompt := fmt.Sprintf("\n[%v]: ", clientAddress)
+	serverPrepend := "[Echo Town]: "
 	welcomeMessage := fmt.Sprintf("Welcome to Echo Town!\nEnter /quit or \"bye\" to exit\nEnter /help for more commands\nYou are connected as [%v]\n", clientAddress)
+	goodbyeMessage := "\nCome back to Echo Town soon!\n"
 
 	// send a welcome message to the client
 	_, err := conn.Write([]byte(welcomeMessage))
@@ -123,7 +125,7 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 
 		response, close = command.Parse(response)
 		if close {
-			conn.Write([]byte("\nCome back to Echo Town soon!\n"))
+			conn.Write([]byte(goodbyeMessage))
 			return
 		}
 
@@ -135,7 +137,7 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 		clientLogger.Printf("[RESPONSE] %s", response)
 
 		// prepend server responses
-		response = fmt.Sprintf("[Echo Town]: %s\n", response)
+		response = fmt.Sprintf("%s%s\n", serverPrepend, response)
 
 		// write response to the client
 		_, err = conn.Write([]byte(response))
@@ -145,7 +147,7 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 
 		// send custom exit message when connection is closed through personality of command protocol
 		if close {
-			conn.Write([]byte("\nCome back to Echo Town soon!\n"))
+			conn.Write([]byte(goodbyeMessage))
 			return
 		}
 	}
