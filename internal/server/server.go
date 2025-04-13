@@ -12,6 +12,8 @@ import (
 	"github.com/andreshungbz/echotown/internal/server/internal/command"
 	"github.com/andreshungbz/echotown/internal/server/internal/logger"
 	"github.com/andreshungbz/echotown/internal/server/internal/personality"
+
+	"github.com/fatih/color"
 )
 
 // Start infinitely listens for connection and creates a goroutine for every connecting client.
@@ -69,8 +71,8 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 	defer conn.Close()
 
 	clientAddress := conn.RemoteAddr()
-	clientPrompt := fmt.Sprintf("\n[%v]: ", clientAddress)
-	serverPrepend := "[Echo Town]: "
+	clientPrompt := color.YellowString("\n[%v]: ", clientAddress)
+	serverPrepend := color.CyanString("[Echo Town]: ")
 	welcomeMessage := fmt.Sprintf("Welcome to Echo Town!\nEnter /quit or \"bye\" to exit\nEnter /help for more commands\nYou are connected as [%v]\n", clientAddress)
 	goodbyeMessage := "\nCome back to Echo Town soon!\n"
 
