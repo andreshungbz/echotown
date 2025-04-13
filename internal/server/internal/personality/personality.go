@@ -10,10 +10,24 @@ type PersonalityResponse struct {
 }
 
 // extendible map of specific input to custom response
-var responses = map[string]PersonalityResponse{
-	"hello": {"Hi there!", false},
-	"":      {"Say something...", false},
-	"bye":   {"Goodbye!", true},
+var responses = make(map[string]PersonalityResponse)
+
+// initiate map
+func init() {
+	responses["hello"] = PersonalityResponse{
+		Message: "Hi there!",
+		Close:   false,
+	}
+
+	responses[""] = PersonalityResponse{
+		Message: "Say something...",
+		Close:   false,
+	}
+
+	responses["bye"] = PersonalityResponse{
+		Message: "Goodbye!",
+		Close:   true,
+	}
 }
 
 // Parse compares the input to pre-determined keys, and if they match,
