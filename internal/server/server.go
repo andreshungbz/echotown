@@ -84,7 +84,6 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 		return
 	}
 
-	conn.SetReadDeadline(time.Now().Add(time.Second * 30))
 	reader := bufio.NewReader(conn)
 
 	// client connection infinite loop
@@ -97,6 +96,9 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 			serverLogger.Print(createError("Client Prompt", clientAddress, err))
 			return
 		}
+
+		// set and reset connection timeout
+		conn.SetReadDeadline(time.Now().Add(time.Second * 30))
 
 		// construct response from validated input
 		response, err := createResponse(reader, clientLogger)
