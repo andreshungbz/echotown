@@ -66,7 +66,7 @@ go test ./...
 ```
 
 > [!NOTE]
-> The server tests uses port 4001, so make sure that port is not in use when running the tests.
+> The server tests use port 4001, so make sure the port is not in use when running the tests.
 
 ## Cleanup
 
@@ -80,8 +80,8 @@ make clean
 
 ### Most Educationally Enriching Functionality
 
-The most educationally enriching functionality was the the logger implemntation. It was cool to see how versatile the `log` standard library package is. Being able to easily determine the log output to standard output, to a file, or to both at the same time was very useful. I got to review file handling concepts I was introduced to in Programming 2, such as file modes, as well as Linux file permissions (I still can't rapidly convert from the octal system, but I recognize to which group the permissions should map to). Using my `logger` package helped organize my project and enabled easy extensibility when I needed to implement client message logging.
+The most educationally enriching functionality was the logger implementation. Seeing how versatile the `log` standard library package is was cool. Being able to easily determine the log output to standard output, to a file, or both simultaneously was very useful. I got to review file handling concepts I was introduced to in Programming 2, such as file modes and Linux file permissions (I still can't rapidly convert from the octal system, but I recognize to which group the permissions should map). Using my `logger` package helped organize my project and enabled easy extensibility when I needed to implement client message logging.
 
-### Funcionality That Required the Most Research
+### Functionality That Required the Most Research
 
-The functionality that required the most research was the input validation and handling. The first thing I had to figure out was what kind of inputs constituted bad input in order to determine the scope to handle. After learning that terminals often have a 1024 character input limit, I decided that testing the input through a Go test would be the best way to go about it. Much time was spent looking at the documentation pages for the `net` and `bufio` standard library packages in order to test effectively by programmatically writing the input. In the end, it was worth writing those tests early, as they became useful while implementing other features or refactoring code.
+The functionality that required the most research was the input validation and handling. The first thing I had to figure out was what kind of inputs constituted bad input to determine the scope to handle. After learning that terminals often have a 1024-character input limit, I decided that testing the input through a Go test would be the best way. Much time was spent looking at the documentation pages for the `net` and `bufio` standard library packages to test effectively by programmatically writing the input. Ultimately, writing those tests early was worth it, as they became helpful while implementing other features or refactoring code.
