@@ -15,6 +15,7 @@ LOG_DIR = log
 
 clean:
 	@echo "$(PREFIX) removing $(BUILD_DIR) and log directories"
+	@rm -rfv $(BUILD_DIR)
 	@find . -type d -name "$(LOG_DIR)" -exec rm -rfv {} +
 
 format: clean
