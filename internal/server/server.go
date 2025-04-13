@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/andreshungbz/echotown/internal/server/internal/command"
 	"github.com/andreshungbz/echotown/internal/server/internal/logger"
 	"github.com/andreshungbz/echotown/internal/server/internal/personality"
 )
@@ -118,8 +119,13 @@ func handleConn(conn net.Conn, serverLogger, clientLogger *log.Logger) {
 
 		var close bool // determines whether to close the connection
 
-		// parse server custom personality response
-		response, close = personality.Parse(response)
+		response, close = command.Parse(response)
+		if close {
+			conn.Write([]byte("\nCome back to Echo Town soon!\n"))
+			return
+		}
+
+		response, close = personality.Parse(response) // parse server custom personality response
 
 		// SERVER TO CLIENT WRITING
 
