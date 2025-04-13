@@ -39,11 +39,11 @@ make
 1. Start the Echo Town server with the following command. The server will use port 4000 by default.
 
 ```
-./bin/mpscan
+./bin/echotown
 ```
 
 > [!TIP]
-> Specify a different port with the `-port` flag. For example, `./bin/mpscan -port 4040`.
+> Specify a different port with the `-port` flag. For example, `./bin/echotown -port 4040`.
 
 ### Client Steps
 
