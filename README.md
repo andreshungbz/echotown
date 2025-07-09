@@ -1,4 +1,4 @@
-# Echo Town 📢
+# Echo Town
 
 `echotown` is a simple TCP echo server written in Go. It can handle multiple client connections, does input validation, and has a personality mode and command protocol for custom responses. Server connections/disconnections and client messages are properly logged.
 
