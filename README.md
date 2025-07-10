@@ -2,7 +2,7 @@
 
 `echotown` is a simple TCP echo server written in Go. It can handle multiple client connections, does input validation, and has a personality mode and command protocol for custom responses. Server connections/disconnections and client messages are properly logged.
 
-## Video Demonstration
+## Video Demonstration (Server + Client)
 
 Click on this [YouTube](https://youtu.be/L2FzdG2_gZw?si=2wAJf43wLx-L_pjX) link to see a demonstration of the server in action.
 
